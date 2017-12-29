@@ -91,6 +91,8 @@ int main() {
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
+          double steer_value = j[1]["steering_angle"];
+          double throttle_value = j[1]["throttle"];
 
           for (int i =0; i<ptsx.size(); i++) {
             // shift car reference angle to 90 degrees
@@ -113,6 +115,18 @@ int main() {
           double cte = polyeval(coeffs, 0);
           // double epsi = psi - atan(coeffs[1] + 2 * px * coeffs[2] 3 * coeffs[3] pow(px, 2));
           double epsi = -atan(coeffs[1]);
+          double latency = 0.1;
+          // double dt = 0.1;
+          double Lf = 2.67;
+          px = 0;
+          py = 0;
+          psi = 0;
+          cte = cte + v * sin(epsi) * latency;
+          epsi = epsi + (v/Lf) * steer_value * latency;
+          psi = psi + (v/Lf)*steer_value*latency;
+          px = px + v*cos(psi)*latency;
+          py = py + v*sin(psi)*latency;
+          v = v + throttle_value * latency *0.447;
 
           /*
           * TODO: Calculate steering angle and throttle using MPC.
@@ -120,11 +134,9 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
-          // double steer_value = j[1]["steering_angle"];
-          // double throttle_value = j[1]["throttle"];
           
           Eigen::VectorXd state(6);
-          state << 0, 0, 0, v, cte, epsi;
+          state << px, py, psi, v, cte, epsi;
 
           auto vars = mpc.Solve(state, coeffs);
           // double Lf = 2.67;
@@ -132,7 +144,7 @@ int main() {
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          msgJson["steering_angle"] = vars[0]/(deg2rad(25));// * Lf);
+          msgJson["steering_angle"] = -vars[0]/(deg2rad(25));// * Lf);
           msgJson["throttle"] = vars[1];
 
           //Display the MPC predicted trajectory 
