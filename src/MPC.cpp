@@ -6,10 +6,10 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-// size_t N = 25;
+size_t N = 10;
+double dt = 0.1;
+// size_t N = 35;
 // double dt = 0.05;
-size_t N = 35;
-double dt = 0.05;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -25,7 +25,7 @@ const double Lf = 2.67;
 
 // Both the reference cross track and orientation errors are 0.
 // The reference velocity is set to 40mph.
-double ref_cte = 0;
+double ref_cte = -1.5;
 double ref_epsi = 0;
 double ref_v = 100;
 
@@ -73,29 +73,29 @@ class FG_eval {
     //   fg[0] += 100000000*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2) ;      
     // }
     for(int t = 0; t<N; t++) {
-      fg[0] += 120000*CppAD::pow((vars[cte_start + t] - cte_start), 2) ;
-      fg[0] += 130000*CppAD::pow(vars[epsi_start + t] - epsi_start, 2) ;
-      fg[0] += 40.0*CppAD::pow(vars[v_start + t] - ref_v, 2) ;
+      fg[0] += 8000*CppAD::pow((vars[cte_start + t] - ref_cte), 2) ;
+      fg[0] += 10000*CppAD::pow(vars[epsi_start + t] - ref_epsi, 2) ;
+      fg[0] += 15.0*CppAD::pow(vars[v_start + t] - ref_v, 2) ;
     }
 
     // Minimize the use of actuators
     for(int t = 0; t<N - 1; t++) {
-      fg[0] += 5*CppAD::pow(vars[delta_start + t], 2) ;
-      fg[0] += 800*CppAD::pow(vars[a_start + t], 2) ;
+      fg[0] += 1500*CppAD::pow(vars[delta_start + t], 2) ;
+      fg[0] += 900*CppAD::pow(vars[a_start + t], 2) ;
       // Slow on turns      
-      fg[0] += 1000000*CppAD::pow(vars[delta_start + t] * (vars[cte_start + t] - 0), 2);
-      fg[0] += 1100000*CppAD::pow(vars[delta_start + t] * (vars[epsi_start + t] - 0), 2);
-      fg[0] += 3500*CppAD::pow(vars[delta_start + t] * vars[v_start + t], 2);
+      // fg[0] += 1000000*CppAD::pow(vars[delta_start + t] * (vars[cte_start + t] - 0), 2);
+      // fg[0] += 1100000*CppAD::pow(vars[delta_start + t] * (vars[epsi_start + t] - 0), 2);
+      fg[0] += 10000*CppAD::pow(vars[delta_start + t] * vars[v_start + t], 2);
       // fg[0] += 95000*CppAD::pow(vars[delta_start + t] * (vars[cte_start + t] - 0), 2) ;
       // fg[0] += 10000*CppAD::pow(vars[delta_start + t] * (vars[epsi_start + t] - 0), 2) ;
-      fg[0] += 3000000*CppAD::pow(vars[delta_start + t] * (vars[a_start + t]), 2) ;
+      // fg[0] += 3000000*CppAD::pow(vars[delta_start + t] * (vars[a_start + t]), 2) ;
     }
 
     // Minimize the value gap between sequential actuations.
     for(int t = 0; t<N - 2; t++) {
-      fg[0] += 5000000000000*CppAD::pow((vars[delta_start + t + 1] - vars[delta_start + t]), 2) ;
+      fg[0] += 8000000*CppAD::pow((vars[delta_start + t + 1] - vars[delta_start + t]), 2) ;
       // fg[0] += 700000*CppAD::pow(vars[v_start + t] *(vars[delta_start + t + 1] - vars[delta_start + t]), 2) ;
-      fg[0] += 100000000000000*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2) ;      
+      fg[0] += 60000*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2) ;      
       // fg[0] += 60000*CppAD::pow(vars[delta_start + t] *(vars[a_start + t + 1] - vars[a_start + t]), 2) ;      
       // fg[0] += 600000*CppAD::pow(vars[delta_start + t] * vars[a_start+t], 2);
     }
