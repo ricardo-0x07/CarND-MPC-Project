@@ -8,8 +8,6 @@ using CppAD::AD;
 // TODO: Set the timestep length and duration
 size_t N = 10;
 double dt = 0.1;
-// size_t N = 35;
-// double dt = 0.05;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -55,27 +53,10 @@ class FG_eval {
     // the Solver function below.
     fg[0] = 0;
     // The part of the function based on the reference state
-    // for(int t = 0; t<N; t++) {
-    //   fg[0] += 9950000*CppAD::pow(vars[cte_start + t] - ref_cte, 2) ;
-    //   fg[0] += 10000000*CppAD::pow(vars[epsi_start + t] - ref_epsi, 2) ;
-    //   fg[0] += 3750*CppAD::pow(vars[v_start + t] - ref_v, 2) ;
-    // }
-
-    // // Minimize the use of actuators
-    // for(int t = 0; t<N - 1; t++) {
-    //   fg[0] += 1*CppAD::pow(vars[delta_start + t], 2) ;
-    //   fg[0] += 5*CppAD::pow(vars[a_start + t], 2) ;      
-    // }
-
-    // // Minimize the value gap between sequential actuations.
-    // for(int t = 0; t<N - 2; t++) {
-    //   fg[0] += 20000000000*CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2) ;
-    //   fg[0] += 100000000*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2) ;      
-    // }
     for(int t = 0; t<N; t++) {
-      fg[0] += 8000*CppAD::pow((vars[cte_start + t] - ref_cte), 2) ;
-      fg[0] += 10000*CppAD::pow(vars[epsi_start + t] - ref_epsi, 2) ;
-      fg[0] += 15.0*CppAD::pow(vars[v_start + t] - ref_v, 2) ;
+      fg[0] += 600000*CppAD::pow((vars[cte_start + t] - ref_cte), 2) ;
+      fg[0] += 610000*CppAD::pow(vars[epsi_start + t] - ref_epsi, 2) ;
+      fg[0] += 19*CppAD::pow(vars[v_start + t] - ref_v, 2) ;
     }
 
     // Minimize the use of actuators
@@ -83,21 +64,13 @@ class FG_eval {
       fg[0] += 1500*CppAD::pow(vars[delta_start + t], 2) ;
       fg[0] += 900*CppAD::pow(vars[a_start + t], 2) ;
       // Slow on turns      
-      // fg[0] += 1000000*CppAD::pow(vars[delta_start + t] * (vars[cte_start + t] - 0), 2);
-      // fg[0] += 1100000*CppAD::pow(vars[delta_start + t] * (vars[epsi_start + t] - 0), 2);
-      fg[0] += 10000*CppAD::pow(vars[delta_start + t] * vars[v_start + t], 2);
-      // fg[0] += 95000*CppAD::pow(vars[delta_start + t] * (vars[cte_start + t] - 0), 2) ;
-      // fg[0] += 10000*CppAD::pow(vars[delta_start + t] * (vars[epsi_start + t] - 0), 2) ;
-      // fg[0] += 3000000*CppAD::pow(vars[delta_start + t] * (vars[a_start + t]), 2) ;
+      fg[0] += 9000*CppAD::pow(vars[delta_start + t] * vars[v_start + t], 2);
     }
 
     // Minimize the value gap between sequential actuations.
     for(int t = 0; t<N - 2; t++) {
-      fg[0] += 8000000*CppAD::pow((vars[delta_start + t + 1] - vars[delta_start + t]), 2) ;
-      // fg[0] += 700000*CppAD::pow(vars[v_start + t] *(vars[delta_start + t + 1] - vars[delta_start + t]), 2) ;
-      fg[0] += 60000*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2) ;      
-      // fg[0] += 60000*CppAD::pow(vars[delta_start + t] *(vars[a_start + t + 1] - vars[a_start + t]), 2) ;      
-      // fg[0] += 600000*CppAD::pow(vars[delta_start + t] * vars[a_start+t], 2);
+      fg[0] += 90000000*CppAD::pow((vars[delta_start + t + 1] - vars[delta_start + t]), 2) ;
+      fg[0] += 50000*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2) ;      
     }
 
     // Setup Constraints
@@ -163,12 +136,12 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   bool ok = true;
   // size_t i;
   typedef CPPAD_TESTVECTOR(double) Dvector;
-  double x = state[0];
-  double y = state[1];
-  double psi = state[2];
-  double v = state[3];
-  double cte = state[4];
-  double epsi = state[5];
+  const double x = state[0];
+  const double y = state[1];
+  const double psi = state[2];
+  const double v = state[3];
+  const double cte = state[4];
+  const double epsi = state[5];
 
   // TODO: Set the number of model variables (includes both states and inputs).
   // For example: If the state is a 4 element vector, the actuators is a 2
@@ -190,12 +163,12 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   Dvector vars_lowerbound(n_vars);
   Dvector vars_upperbound(n_vars);
   // TODO: Set lower and upper limits for variables.
-  vars[x_start] = x;
-  vars[y_start] = y;
-  vars[psi_start] = psi;
-  vars[v_start] = v;
-  vars[cte_start] = cte;
-  vars[epsi_start] = epsi;
+  // vars[x_start] = x;
+  // vars[y_start] = y;
+  // vars[psi_start] = psi;
+  // vars[v_start] = v;
+  // vars[cte_start] = cte;
+  // vars[epsi_start] = epsi;
 
   // Set all non-actuators upper and lower limits.
   // to max negative and positive values.
